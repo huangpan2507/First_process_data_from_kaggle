@@ -1,0 +1,64 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import preprocessing #归一化用的工具
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split #用于数据分割
+
+#把训练集和测试集的数据读取
+train=pd.read_csv(‘train.csv’,index_col=0)
+test=pd.read_csv(‘test.csv’,index_col=0)
+y_test=pd.read_csv(‘sample_submission.csv’,index_col=0)
+
+#方便统一处理，先将二者数据合并，
+
+set=pd.concat([test,y_test],axis=1) #注意这里axis=1,是给test加上一列
+all_set=pd.concat([train,set],axis=0) #这里axis=0，是要把两个表格以增加行数方式拼接
+
+#查看数据信息
+all_set.info()
+
+#PoolQC , MiscFeature , Alley 三个特征缺失特别严重，所以将这三个特征删除
+all_set=all_set.drop([‘PoolQC’,‘MiscFeature’,‘Alley’] , axis=1)
+
+#剩下的很多样本中偶有缺失值，将有缺失值的样本都删除
+all_set=all_set.dropna()
+all_set.info() #发现就206个样本是完整的，好像删的太狠了。。。
+
+#因为各个特征取值变化幅度太大，所以要标准化（归一化）
+saleprice=all_set[‘SalePrice’]
+print(saleprice)
+all_set1=all_set.drop([‘SalePrice’],axis=1)
+numeric_cols=all_set1.columns[all_set1.dtypes != ‘object’]
+print(numeric_cols) #看看有哪些特征是数值型,发现很多，决定将它分成两部分
+all_set1_num=pd.DataFrame() #创建一个空数据框放数值型特征的值
+all_set1_ob=pd.DataFrame() #创建一个空数据框放字符型特征的值
+for i in all_set1.columns.values: #遍历数据内每一列的值
+if all_set1[i].dtypes == ‘object’:
+all_set1_ob=pd.concat([all_set1_ob , all_set1[i]] , axis=1) #把数值型和字符型分开
+else:
+all_set1_num=pd.concat([all_set1_num , all_set1[i]] , axis=1)
+
+all_set1_ob_dum=pd.get_dummies(all_set1_ob) #数据集进行onehot哑编码，
+# 将定性量转化为哑编码方式，便于后续训练模型
+
+all_set1=pd.concat([all_set1_num,all_set1_ob_dum],axis=1)
+all_set=pd.concat([all_set1,saleprice],axis=1)
+print(all_set)
+
+#数据分割(之前把训练集和测试集合并在一起了，现在把他们分开）
+train1,test1=train_test_split(all_set,test_size=0.2)
+y_test1=test1[‘SalePrice’] #把售价单独拿出来
+x_test1=test1.drop([‘SalePrice’],axis=1)
+y_train1=train1[‘SalePrice’]
+x_train1=train1.drop([‘SalePrice’],axis=1)
+
+#利用sklearn中的线性模型建模
+model=linear_model.LinearRegression()
+model.fit(x_train1,y_train1)
+train_score=model.score(x_train1,y_train1)
+cv_score=model.score(x_test1,y_test1)
+print(‘train_score: {0:0.6f};cv_score: {1:0.6f}’.format(train_score,cv_score))
+————————————————
+版权声明：本文为CSDN博主「La  Prairie」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/weixin_43414976/article/details/87943735
