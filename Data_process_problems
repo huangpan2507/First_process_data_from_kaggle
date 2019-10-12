@@ -1,0 +1,67 @@
+问题 1. jone-hot编码： 有现成的函数  pd.get_dummies（数据集）函数
+
+问题 2. 关于将数据集分为 train val test三部分 ，然而 没处理好def __len__（self）：函数， 导致数据集还是没分成 train val test三部分
+
+如下：本想分为三部分  ，发现类实例化初始化后， 在调用实例对象时， 调用的len 里面没有将数据集分为三类，现在考虑将分三部分的放到 def __len__（self）：
+里面。
+     def __init__(self, csv_file, root_dir, mode, transform=True):
+        """
+        :param csv_file (str): Path to the csv file with annotations
+        :param root_dir(str): Directory with all the images
+        :param transform: optional transform to be applied on a sample
+        """
+        print('1')
+        self.landmarks_frame = pd.read_csv(csv_file)
+        self.root_dir = root_dir
+        # self.label_Onehot = label_Onehot
+        self.transform = transform
+        self.name2label = {}
+
+        self.name = self.landmarks_frame['Name']
+        self.label = self.landmarks_frame['Type1']
+        self.class_sample = []
+        print('len_name:', len(self.name))
+
+        if mode == 'train':
+            self.name = self.name[:int(0.8*len(self.name))]
+            self.label = self.label[:int(0.8*len(self.label))]
+            print('len_train:', len(self.name))
+        elif mode == 'val':
+            self.name = self.name[int(0.8*len(self.name)):int(0.9*len(self.name))]
+            self.label = self.label[int(0.8*len(self.name)):int(0.9*len(self.name))]
+            print('len_val:', len(self.name))
+        else:
+            self.name = self.name[int(0.9*len(self.name)):]
+            self.label = self.label[int(0.9*len(self.name)):]
+            print('len_test:', len(self.name))
+
+    def __len__(self):
+        return len(self.landmarks_frame)
+
+    def __getitem__(self, idx):
+        print('idx:', idx)
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+            
+   
+   # 类初始化
+   train_db = FaceLanmarksDataset(csv_file='/home/huangpan/Documents/pokemon_images/pokemon.csv',
+                                            root_dir='/home/huangpan/Documents/pokemon_images/images/', mode='train',
+                                            transform=transforms.Compose([Rescale(256), RandomCrop(224),
+                                                                          ToTensor(), ]))
+    val_db = FaceLanmarksDataset(csv_file='/home/huangpan/Documents/pokemon_images/pokemon.csv',
+                                          root_dir='/home/huangpan/Documents/pokemon_images/images/', mode='val',
+                                          transform=transforms.Compose([Rescale(256), RandomCrop(224),
+                                                                        ToTensor(), ]))
+    test_db = FaceLanmarksDataset(csv_file='/home/huangpan/Documents/pokemon_images/pokemon.csv',
+                                           root_dir='/home/huangpan/Documents/pokemon_images/images/', mode='test',
+                                           transform=transforms.Compose([Rescale(256), RandomCrop(224),
+                                                                         ToTensor(), ]))
+                                                                         
+    # 实例对象调用len（）函数，获取的还是所有的长度，并没有将数据集分3部分
+    train_loader = DataLoader(train_db, batch_size=4, shuffle=True, num_workers=0, drop_last=True)
+    val_loader = DataLoader(val_db, batch_size=4,  num_workers=0, drop_last=True)
+    test_loader = DataLoader(test_db, batch_size=4, num_workers=0, drop_last=True)
+
+    print('len_train_data:', len(train_loader), 'len_val_data:', len(val_loader), 'len_test_data:', len(test_loader))  # 这里并没有分成3部分的长度
+            
