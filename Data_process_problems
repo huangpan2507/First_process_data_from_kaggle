@@ -84,7 +84,7 @@
     print('len_train_data:', len(train_loader), 'len_val_data:', len(val_loader), 'len_test_data:', len(test_loader))  #  这里并没有分成3部分的长度
       
       
-    方法： 修改成 如下即可
+    方法： 修改成 如下即可。当调用len函数时， 会返回 3部分数据集对应的长度
         def __len__(self):
         return len(self.name)
          
