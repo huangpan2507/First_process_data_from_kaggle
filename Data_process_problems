@@ -63,5 +63,5 @@
     val_loader = DataLoader(val_db, batch_size=4,  num_workers=0, drop_last=True)
     test_loader = DataLoader(test_db, batch_size=4, num_workers=0, drop_last=True)
 
-    print('len_train_data:', len(train_loader), 'len_val_data:', len(val_loader), 'len_test_data:', len(test_loader))  # 这里并没有分成3部分的长度
+    print('len_train_data:', len(train_loader), 'len_val_data:', len(val_loader), 'len_test_data:', len(test_loader))  #  这里并没有分成3部分的长度
             
