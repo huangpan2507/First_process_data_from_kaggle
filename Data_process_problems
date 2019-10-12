@@ -1,11 +1,11 @@
 问题 1. 怎么转换成 one-hot编码：
-       方法：有现成的函数  pd.get_dummies（数据集）函数
+解决方法：有现成的函数  pd.get_dummies（数据集）函数
 
 问题 2： 数据类型转换： 
-       方法：例如 image = image.astype(np.float64) 转化为float64    
+解决方法：例如 image = image.astype(np.float64) 转化为float64    
 
 问题 3： 当初要解决 如下问题： 一大串 有重复值的数据集， 要求统计种类， 并列出该种类 对应的index  [猪，牛，羊] 返回 index ：0， 1 ，2
-       方法：
+解决方法：
         label = landmarks_frame['Type1']                       # <class 'pandas.core.series.Series'>
         # print('label:',  type(label), label)
 
@@ -17,8 +17,14 @@
                 # print('{} has add:', m)
         landmarks = self.class_sample.index(label_type)        # 取出种类对应的index
         
+
+问题 4：此处新增加一个容易忽略的报错点： 比如你的 image 是 torch.Size([4, 3, 224, 224]) torch.float64 torch.DoubleTensor
+       然后用 b = transforms.ToPILImage()(image[0]，就是取某一张 [3, 224, 224] ) 此时报错： TypeError: Input type float64 is not supported。
+解决方法： image[0] 转化为 torch.float32 而不是 torch.float64
+
+        
  
-问题 4. 关于将数据集分为 train val test三部分 ，然而 没处理好def __len__（self）：函数， 导致数据集还是没分成 train val test三部分
+问题 5. 关于将数据集分为 train val test三部分 ，然而 没处理好def __len__（self）：函数， 导致数据集还是没分成 train val test三部分
 
 如下：本想分为三部分  ，发现类实例化初始化后， 在调用实例对象时， 调用的len 里面没有将数据集分为三类，现在考虑将分三部分的放到 def __len__（self）：
 里面。
