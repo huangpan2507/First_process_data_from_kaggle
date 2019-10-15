@@ -27,7 +27,7 @@
 问题 5. 关于将数据集分为 train val test三部分 ，然而 没处理好def __len__（self）：函数， 导致数据集还是没分成 train val test三部分
 
 如下：本想分为三部分  ，发现类实例化初始化后， 在调用实例对象时， 调用的len 里面没有将数据集分为三类，现在考虑将分三部分的放到 def __len__（self）：
-里面。
+里面（后来发现，根本不用这样做）
      def __init__(self, csv_file, root_dir, mode, transform=True):
         """
         :param csv_file (str): Path to the csv file with annotations
